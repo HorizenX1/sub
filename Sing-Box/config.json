@@ -252,8 +252,7 @@
           "xbox",
           "apple@cn",
           "microsoft@cn",
-          "googlefcm",
-          "cn"
+          "googlefcm"
         ],
         "domain_suffix": [
           "linux.do",
@@ -298,15 +297,21 @@
           "teamspeak.com"
         ],
         "rule_set": [
-          "cnbeta",
-          "geolocation-!cn"
+          "cnbeta"
         ],
         "action": "route",
         "outbound": "Proxy"
       },
       {
-        "rule_set": [
-          "cnip"
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "rule_set": "cnip"
+          },
+          {
+            "rule_set": "cn"
+          }
         ],
         "action": "route",
         "outbound": "Domestic"
