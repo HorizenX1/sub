@@ -73,7 +73,6 @@
       {
         "rule_set": [
           "category-games@cn",
-          "xbox",
           "apple@cn",
           "microsoft@cn",
           "googlefcm",
