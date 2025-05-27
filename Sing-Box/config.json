@@ -1,0 +1,423 @@
+{
+  "log": {
+    "disabled": false,
+    "level": "info",
+    "timestamp": true
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "store_fakeip": true
+    },
+    "clash_api": {
+      "external_controller": "0.0.0.0:9090",
+      "external_ui": "ui",
+      "external_ui_download_detour": "Proxy",
+      "external_ui_download_url": "https://github.com/Zephyruso/zashboard/archive/refs/heads/gh-pages.zip",
+      "secret": "",
+      "default_mode": "rule"
+    }
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "Domestic",
+        "type": "https",
+        "server": "223.6.6.6",
+        "detour": "Domestic"
+      },
+      {
+        "tag": "Proxy",
+        "type": "https",
+        "server": "1.1.1.1",
+        "detour": "Proxy"
+      },
+      {
+        "tag": "Local",
+        "type": "local"
+      },
+      {
+        "tag": "remote",
+        "type": "fakeip",
+        "inet4_range": "198.18.0.0/15",
+        "inet6_range": "fc00::/18"
+      }
+    ],
+    "rules": [
+      {
+        "clash_mode": "Direct",
+        "action": "route",
+        "server": "Domestic"
+      },
+      {
+        "domain_suffix": [
+          ".lan"
+        ],
+        "action": "route",
+        "server": "Local"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "clash_mode": "AllowAds",
+            "invert": true
+          },
+          {
+            "rule_set": "AWAvenue-Ads"
+          }
+        ],
+        "action": "reject"
+      },
+      {
+        "rule_set": [
+          "category-games@cn",
+          "xbox",
+          "apple@cn",
+          "microsoft@cn",
+          "googlefcm",
+          "cn"
+        ],
+        "domain_suffix": [
+          "linux.do",
+          "controlplane.tailscale.com",
+          "log.tailscale.io",
+          "zhishimao.com"
+        ],
+        "action": "route",
+        "server": "Domestic"
+      },
+      {
+        "query_type": [
+          "A",
+          "AAAA"
+        ],
+        "action": "route",
+        "server": "remote"
+      }
+    ],
+    "strategy": "prefer_ipv4",
+    "independent_cache": true,
+    "reverse_mapping": true
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "interface_name": "tun0",
+      "address": [
+        "172.18.0.1/30",
+        "fdfe:dcba:9876::1/126"
+      ],
+      "stack": "mixed",
+      "auto_route": true,
+      "auto_redirect": true
+    }
+  ],
+  "providers": [
+    {
+      "tag": "魔戒",
+      "type": "remote",
+      "url": "",
+      "update_interval": "24h",
+      "download_detour": "Proxy",
+      "health_check": {
+        "enabled": true
+      }
+    },
+    {
+      "tag": "skyhope",
+      "type": "remote",
+      "url": "",
+      "update_interval": "24h",
+      "download_detour": "Proxy",
+      "health_check": {
+        "enabled": true
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "Direct"
+    },
+    {
+      "type": "selector",
+      "tag": "Proxy",
+      "outbounds": [
+        "Direct",
+        "skyhope",
+        "魔戒"
+      ],
+      "interrupt_exist_connections": true
+    },
+    {
+      "type": "selector",
+      "tag": "Game",
+      "outbounds": [
+        "Direct",
+        "Proxy"
+      ],
+      "default": "Direct",
+      "use_all_providers": true
+    },
+    {
+      "type": "selector",
+      "tag": "skyhope",
+      "providers": [
+        "skyhope"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "魔戒",
+      "providers": [
+        "魔戒"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "AI",
+      "use_all_providers": true
+    },
+    {
+      "type": "selector",
+      "tag": "galaxyappstore",
+      "outbounds": [
+        "Direct",
+        "Proxy"
+      ],
+      "default": "Direct"
+    },
+    {
+      "type": "selector",
+      "tag": "ehentai",
+      "use_all_providers": true,
+      "include": "美|英|法|德|加拿|瑞|荷|意"
+    },
+    {
+      "type": "selector",
+      "tag": "Domestic",
+      "outbounds": [
+        "Direct",
+        "Proxy"
+      ],
+      "default": "Direct"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "action": "sniff"
+      },
+      {
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "port": 53
+          },
+          {
+            "protocol": "dns"
+          }
+        ],
+        "action": "hijack-dns"
+      },
+      {
+        "protocol": "bittorrent",
+        "outbound": "Direct"
+      },
+      {
+        "clash_mode": "Direct",
+        "action": "route",
+        "outbound": "direct"
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "clash_mode": "AllowAds",
+            "invert": true
+          },
+          {
+            "rule_set": "AWAvenue-Ads"
+          }
+        ],
+        "action": "reject"
+      },
+      {
+        "rule_set": [
+          "category-games@cn",
+          "xbox",
+          "apple@cn",
+          "microsoft@cn",
+          "googlefcm",
+          "cn"
+        ],
+        "domain_suffix": [
+          "linux.do",
+          "controlplane.tailscale.com",
+          "log.tailscale.io"
+        ],
+        "action": "route",
+        "outbound": "Domestic"
+      },
+      {
+        "rule_set": "xbox",
+        "action": "route",
+        "outbound": "Game"
+      },
+      {
+        "rule_set": [
+          "openai",
+          "anthropic",
+          "gemini"
+        ],
+        "action": "route",
+        "outbound": "AI"
+      },
+      {
+        "domain_suffix": [
+          "galaxyappstore.com"
+        ],
+        "action": "route",
+        "outbound": "galaxyappstore"
+      },
+      {
+        "rule_set": [
+          "ehentai"
+        ],
+        "action": "route",
+        "outbound": "ehentai"
+      },
+      {
+        "domain_suffix": [
+          "bulianglin.com",
+          "google.cn",
+          "teamspeak.com"
+        ],
+        "rule_set": [
+          "cnbeta",
+          "geolocation-!cn"
+        ],
+        "action": "route",
+        "outbound": "Proxy"
+      },
+      {
+        "rule_set": [
+          "cnip"
+        ],
+        "action": "route",
+        "outbound": "Domestic"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "Direct"
+      }
+    ],
+    "rule_set": [
+      {
+        "tag": "AWAvenue-Ads",
+        "type": "remote",
+        "url": "https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/Filters/AWAvenue-Ads-Rule-Singbox.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "tag": "googlefcm",
+        "type": "remote",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/googlefcm.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "geolocation-!cn",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/geolocation-!cn.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "cnbeta",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/cnbeta.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "openai",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/openai.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "gemini",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/google-gemini.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "ehentai",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/ehentai.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "microsoft@cn",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/microsoft@cn.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "apple@cn",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/apple@cn.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "category-games@cn",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/category-games@cn.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "cn",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/cn.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "xbox",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/xbox.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "anthropic",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/anthropic.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      },
+      {
+        "type": "remote",
+        "tag": "cnip",
+        "url": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geoip/cn.srs",
+        "download_detour": "Proxy",
+        "update_interval": "24h"
+      }
+    ],
+    "auto_detect_interface": true,
+    "final": "Proxy"
+  }
+}
